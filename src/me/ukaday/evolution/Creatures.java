@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Creatures {
 
-    private final List<Creature> creatureContainer = new ArrayList<>();
+    private final ArrayList<Creature> creatureContainer = new ArrayList<>();
 
     public Creatures() {
     }
@@ -20,12 +20,15 @@ public class Creatures {
     }
 
     public void update() {
-        for (Creature c : creatureContainer) {
-            c.update();
+        for (Creature creature : List.copyOf(creatureContainer)) {
+            creature.update();
+            if (creature.getHealth() <= 0) {
+                creatureContainer.remove(creature);
+            }
         }
     }
 
-    public List<Creature> getCreatureContainer() {
+    public ArrayList<Creature> getCreatureContainer() {
         return creatureContainer;
     }
 

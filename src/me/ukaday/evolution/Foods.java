@@ -2,11 +2,17 @@ package me.ukaday.evolution;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.List;
+
+import static me.ukaday.evolution.Evolution.WINDOW_H;
+import static me.ukaday.evolution.Evolution.WINDOW_W;
+import static me.ukaday.evolution.Level.SPAWN_BEZEL;
+import static me.ukaday.evolution.Level.r;
 
 public class Foods {
 
-    private final List<Food> foodContainer = new ArrayList<>();
+    private long prevFoodTime = 0;
+    public static final long FOOD_SPAWN_DELAY = 200;
+    private final ArrayList<Food> foodContainer = new ArrayList<>();
 
     public Foods() {
     }
@@ -19,16 +25,25 @@ public class Foods {
         foodContainer.remove(food);
     }
 
-    public List<Food> getFoodContainer() {
+    public ArrayList<Food> getFoodContainer() {
         return foodContainer;
     }
 
     public void update() {
+        long time = System.currentTimeMillis();
+        if (time - prevFoodTime < FOOD_SPAWN_DELAY) {
+            return;
+        }
+        int x = r.nextInt(SPAWN_BEZEL,WINDOW_W - SPAWN_BEZEL);
+        int y = r.nextInt(SPAWN_BEZEL,WINDOW_H - SPAWN_BEZEL);
+        int energy = r.nextInt(1, 3);
+        add(new Food(x, y, energy));
+        prevFoodTime = time;
     }
 
     public void paint(Graphics g) {
         for (Food food : foodContainer) {
-            food.draw(g);
+            food.paint(g);
         }
     }
 }

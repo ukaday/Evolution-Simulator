@@ -17,12 +17,11 @@ public class Level extends Canvas implements KeyListener, Runnable {
 
     public static long DELTA_TIME = 1;
     public static int SPAWN_BEZEL = 50;
-    private static final long FOOD_SPAWN_DELAY = 200;
     private long prevFoodTime = 0;
     public Ball ball;
     public Foods foods = new Foods();
     public Creatures creatures = new Creatures();
-    private final Random r = new Random();
+    public static final Random r = new Random();
     private BufferedImage back;
     private final Map<Integer, Boolean> keyStates = new HashMap<>();
 
@@ -32,9 +31,17 @@ public class Level extends Canvas implements KeyListener, Runnable {
         setVisible(true);
 
         ball = new Ball(50, 50, 15);
-        int x = r.nextInt(SPAWN_BEZEL, WINDOW_W - SPAWN_BEZEL);
-        int y = r.nextInt(SPAWN_BEZEL, WINDOW_H - SPAWN_BEZEL);
-        creatures.add(new Creature(x, y, 10, .1, .004, 40, 40, foods, creatures));
+        for (int i = 0; i < 10; i++) {
+            int x = r.nextInt(SPAWN_BEZEL, WINDOW_W - SPAWN_BEZEL);
+            int y = r.nextInt(SPAWN_BEZEL, WINDOW_H - SPAWN_BEZEL);
+            creatures.add(new Creature(x, y, 10, .1, .004, .01, 15, 20, foods, creatures));
+        }
+        for (int i = 0; i < 20; i++) {
+            int x = r.nextInt(SPAWN_BEZEL,WINDOW_W - SPAWN_BEZEL);
+            int y = r.nextInt(SPAWN_BEZEL,WINDOW_H - SPAWN_BEZEL);
+            int energy = r.nextInt(1, 3);
+            foods.add(new Food(x, y, energy));
+        }
     }
 
     public static void normalize(double[] v) {
@@ -57,17 +64,6 @@ public class Level extends Canvas implements KeyListener, Runnable {
         }
     }
 
-    public void handleFoods() {
-        long time = System.currentTimeMillis();
-        if (time - prevFoodTime < FOOD_SPAWN_DELAY) {
-            return;
-        }
-        int x = r.nextInt(SPAWN_BEZEL,WINDOW_W - SPAWN_BEZEL);
-        int y = r.nextInt(SPAWN_BEZEL,WINDOW_H - SPAWN_BEZEL);
-        foods.add(new Food(x, y));
-        prevFoodTime = time;
-    }
-
     //KEY LISTENER INTERFACE
     public void keyTyped(KeyEvent e) { }
 
@@ -82,7 +78,7 @@ public class Level extends Canvas implements KeyListener, Runnable {
     //MAIN LOOP FUNCTIONS
     public void update(Graphics g) {
         handleInput();
-        handleFoods();
+        foods.update();
         creatures.update();
         paint(g);
     }

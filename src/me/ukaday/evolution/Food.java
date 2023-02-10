@@ -2,33 +2,40 @@ package me.ukaday.evolution;
 
 import java.awt.*;
 
-public class Food {
+public class Food extends Entity{
 
-    private int x, y, s;
+    private double x, y;
+    private double energy;
+    private double s = 8;
 
-    public Food(int x, int y) {
+    public Food(double x, double y, int energy) {
         this.x = x;
         this.y = y;
-        s = 8;
+        this.energy = energy;
+
     }
 
-    public int getX() {
+    public double getEnergy() {
+        return energy;
+    }
+
+    public double getX() {
         return x;
     }
 
-    public void setX(int x) {
+    public void setX(double x) {
         this.x = x;
     }
 
-    public int getY() {
+    public double getY() {
         return y;
     }
 
-    public void setY(int y) {
+    public void setY(double y) {
         this.y = y;
     }
 
-    public int getS() {
+    public double getS() {
         return s;
     }
 
@@ -36,8 +43,13 @@ public class Food {
         this.s = s;
     }
 
-    public void draw(Graphics g) {
+    public void paint(Graphics g) {
         g.setColor(new Color(130, 80, 130));
-        g.fillRect(x, y, s, s);
+        g.fillRect((int)(x - s/2), (int)(y - s/2), (int)s, (int)s);
+    }
+
+    @Override
+    public String toString() {
+        return x + " " + y;
     }
 }
