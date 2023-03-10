@@ -12,16 +12,17 @@ import static java.awt.event.KeyEvent.*;
 import static me.ukaday.evolution.Direction.*;
 import static me.ukaday.evolution.Evolution.WINDOW_H;
 import static me.ukaday.evolution.Evolution.WINDOW_W;
+import static me.ukaday.evolution.Settings.*;
+import static me.ukaday.evolution.Stat.*;
 
 public class Level extends Canvas implements KeyListener, Runnable {
 
     public static long DELTA_TIME = 1;
-    public static int SPAWN_BEZEL = 50;
-    private long prevFoodTime = 0;
     public Ball ball;
     public Foods foods = new Foods();
     public Creatures creatures = new Creatures();
     public static final Random r = new Random();
+    public static Creature focusedCreature;
     private BufferedImage back;
     private final Map<Integer, Boolean> keyStates = new HashMap<>();
 
@@ -30,11 +31,19 @@ public class Level extends Canvas implements KeyListener, Runnable {
         addKeyListener(this);
         setVisible(true);
 
-        ball = new Ball(50, 50, 15);
-        for (int i = 0; i < 10; i++) {
+        HashMap<Stat, Double> stats = new HashMap<>();
+        stats.put(RADIUS, STARTING_CREATURE_RADIUS);
+        stats.put(SPEED, STARTING_CREATURE_SPEED);
+        stats.put(STEER_FORCE, STARTING_CREATURE_STEER_FORCE);
+        stats.put(STRENGTH, STARTING_CREATURE_STRENGTH);
+        stats.put(MAX_ENERGY, STARTING_CREATURE_MAX_ENERGY);
+        stats.put(MAX_HEALTH, STARTING_CREATURE_MAX_HEALTH);
+
+        //ball = new Ball(50, 50, 15);
+        for (int i = 0; i < 3; i++) {
             int x = r.nextInt(SPAWN_BEZEL, WINDOW_W - SPAWN_BEZEL);
             int y = r.nextInt(SPAWN_BEZEL, WINDOW_H - SPAWN_BEZEL);
-            creatures.add(new Creature(x, y, 10, .1, .004, .01, 15, 20, foods, creatures));
+            creatures.add(new Creature(x, y, stats, foods, creatures));
         }
         for (int i = 0; i < 20; i++) {
             int x = r.nextInt(SPAWN_BEZEL,WINDOW_W - SPAWN_BEZEL);
@@ -93,7 +102,7 @@ public class Level extends Canvas implements KeyListener, Runnable {
 
         foods.paint(gBack);
         creatures.paint(gBack);
-        ball.paint(gBack);
+        //ball.paint(gBack);
 
         g2.drawImage(back, null, 0, 0);
         back = null;

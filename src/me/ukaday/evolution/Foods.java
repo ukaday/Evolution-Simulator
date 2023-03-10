@@ -5,8 +5,8 @@ import java.util.ArrayList;
 
 import static me.ukaday.evolution.Evolution.WINDOW_H;
 import static me.ukaday.evolution.Evolution.WINDOW_W;
-import static me.ukaday.evolution.Level.SPAWN_BEZEL;
 import static me.ukaday.evolution.Level.r;
+import static me.ukaday.evolution.Settings.SPAWN_BEZEL;
 
 public class Foods {
 

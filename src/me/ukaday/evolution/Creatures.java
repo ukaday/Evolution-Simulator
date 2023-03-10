@@ -1,39 +1,59 @@
 package me.ukaday.evolution;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+
+import static me.ukaday.evolution.CreatureState.SEARCHING_FOR_MATE;
 
 public class Creatures {
 
-    private final ArrayList<Creature> creatureContainer = new ArrayList<>();
+    private final HashSet<Creature> creatures = new HashSet<>();
+    private final HashSet<Creature> mateSearchingCreatures = new HashSet<>();
 
     public Creatures() {
     }
 
     public void add(Creature c) {
-        creatureContainer.add(c);
+        creatures.add(c);
     }
 
     public void remove(Creature c) {
-        creatureContainer.remove(c);
+        creatures.remove(c);
     }
 
-    public void update() {
-        for (Creature creature : List.copyOf(creatureContainer)) {
-            creature.update();
-            if (creature.getHealth() <= 0) {
-                creatureContainer.remove(creature);
-            }
+    private void checkDead(Creature creature) {
+        if (creature.getHealth() <= 0) {
+            creatures.remove(creature);
+            mateSearchingCreatures.remove(creature);
         }
     }
 
-    public ArrayList<Creature> getCreatureContainer() {
-        return creatureContainer;
+    public void checkMateSearching(Creature creature) {
+        if (creature.getState() == SEARCHING_FOR_MATE) {
+            mateSearchingCreatures.add(creature);
+        } else {
+            mateSearchingCreatures.remove(creature);
+        }
+    }
+
+    public void update() {
+        for (Creature creature : Set.copyOf(creatures)) {
+            creature.update();
+            checkDead(creature);
+            checkMateSearching(creature);
+        }
+    }
+
+    public HashSet<Creature> getCreatures() {
+        return creatures;
+    }
+    public HashSet<Creature> getMateSearchingCreatures() {
+        return mateSearchingCreatures;
     }
 
     public void paint(Graphics g) {
-        for (Creature c : creatureContainer) {
+        for (Creature c : creatures) {
             c.paint(g);
         }
     }

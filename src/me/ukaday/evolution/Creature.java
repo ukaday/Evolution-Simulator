@@ -1,118 +1,127 @@
 package me.ukaday.evolution;
 
 import java.awt.*;
-import java.util.ArrayList;
+import java.awt.List;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
-import static me.ukaday.evolution.CreatureState.SEARCHING_FOR_FOOD;
-import static me.ukaday.evolution.CreatureState.SEARCHING_FOR_MATE;
-import static me.ukaday.evolution.CreatureState.MATING;
-import static me.ukaday.evolution.EntityType.CREATURE;
-import static me.ukaday.evolution.EntityType.FOOD;
+import static me.ukaday.evolution.CreatureState.*;
+import static me.ukaday.evolution.EntityType.*;
 import static me.ukaday.evolution.Evolution.WINDOW_H;
 import static me.ukaday.evolution.Evolution.WINDOW_W;
-import static me.ukaday.evolution.Level.DELTA_TIME;
-import static me.ukaday.evolution.Level.normalize;
+import static me.ukaday.evolution.Level.*;
+import static me.ukaday.evolution.Settings.*;
+import static me.ukaday.evolution.Stat.*;
 
 public class Creature extends Entity{
 
-    private double x, y;
-    private final int r;
-    private final double speed;
-    private final double steerForce;
-    private final double strength;
-    private final double maxEnergy;
-    private final double maxHealth;
+    Map<Stat, Double> stats;
     private double health;
     private double energy;
-    private final double breedEnergyThreshold;
+    private final double breedThreshold;
+    private double mateTime = 0;
     private final double[] vel = new double[]{0, 0};
-    private final double[] accel = new double[]{0, 0};
+    private final double[] acel = new double[]{0, 0};
     private CreatureState state = SEARCHING_FOR_FOOD;
     private final Foods foods;
     private final Creatures creatures;
-    private final double lineLen = 35;
 
-    public Creature(double x, double y, int r, double speed, double steerForce, double strength, double maxEnergy, double maxHealth, Foods foods, Creatures creatures) {
-        this.x = x;
-        this.y = y;
-        this.r = r;
-        this.speed = speed;
-        this.steerForce = steerForce;
-        this.strength = strength;
-        this.maxEnergy = maxEnergy;
-        this.maxHealth = maxHealth;
-        this.health = maxHealth;
-        this.energy = maxEnergy / 2;
-        this.breedEnergyThreshold = maxEnergy / 2;
+    public Creature(double x, double y, Map<Stat, Double> stats, Foods foods, Creatures creatures) {
+        super(x, y);
+        this.stats = stats;
+        this.health = stats.get(MAX_HEALTH);
+        this.energy = stats.get(MAX_ENERGY) / 2;
+        this.breedThreshold = 2 * stats.get(MAX_ENERGY) / 2;
         this.foods = foods;
         this.creatures = creatures;
     }
 
-    public double getHealth() {
-        return health;
-    }
-    public void setHealth(Double h) {
-        health = h;
-    }
-    public double getEnergy() {
-        return energy;
-    }
-    public int getR() { return r; }
-
     public void move() {
-        Entity target = (state == SEARCHING_FOR_MATE ? seekEntity(CREATURE) : seekEntity(FOOD));
+        Entity target = state == SEARCHING_FOR_MATE ? seekEntity(CREATURE) : seekEntity(FOOD);
 
         double dx, dy;
         if (target != null) {
             dx = target.getX() - getX();
             dy = target.getY() - getY();
+            acel[0] = dx - vel[0] * stats.get(SPEED);
+            acel[1] = dy - vel[1] * stats.get(SPEED);
+            normalize(acel);
+
         } else {
-            dx = dy = 0;
+            acel[0] = acel[1] = 0;
         }
 
-        accel[0] = dx - vel[0] * speed;
-        accel[1] = dy - vel[1] * speed;
-        normalize(accel);
-
-        vel[0] += accel[0] * steerForce * DELTA_TIME;
-        vel[1] += accel[1] * steerForce * DELTA_TIME;
+        vel[0] += acel[0] * stats.get(STEER_FORCE) * DELTA_TIME;
+        vel[1] += acel[1] * stats.get(STEER_FORCE) * DELTA_TIME;
         normalize(vel);
 
-        double nextX = getX() + vel[0] * speed * DELTA_TIME;
-        double nextY = getY() + vel[1] * speed * DELTA_TIME;
+        double newX = getX() + vel[0] * stats.get(SPEED) * DELTA_TIME;
+        double newY = getY() + vel[1] * stats.get(SPEED) * DELTA_TIME;
+        setX(newX);
+        setY(newY);
 
-        if (nextX - r <= 0 || r + nextX >= WINDOW_W) { nextX = x; }
-        if (nextY - r <= 0 || r + nextY >= WINDOW_H) { nextY = y; }
+        handleBorderCollision();
 
-        setX(nextX);
-        setY(nextY);
-        energy -= .00003 * DELTA_TIME;
+       if (target != null && state == SEARCHING_FOR_MATE && getEntityDistance(target) - getR() - ((Creature)target).getR() < CREATURE_MATING_DISTANCE) {
+           breed((Creature)target);
+       }
+
+        energy -= CREATURE_MOVING_ENERGY_DEPRECIATION * DELTA_TIME;
     }
 
-    public ArrayList<Entity> testEntityCollisions() {
-        ArrayList<Entity> collisions = new ArrayList<>();
-        for (Food target: foods.getFoodContainer()) {
-            if (Math.sqrt(Math.pow((target.getX() - getX()),2) + Math.pow((target.getY() - getY()),2)) < r) {
+    private void handleBorderCollision() {
+        if (getX() < stats.get(RADIUS)) {
+            setX(stats.get(RADIUS));
+        } else if (getX() > WINDOW_W - stats.get(RADIUS)) {
+            setX(WINDOW_W - stats.get(RADIUS));
+        }
+        if (getY() < stats.get(RADIUS)) {
+            setY(stats.get(RADIUS));
+        } else if (getY() > WINDOW_W - stats.get(RADIUS)) {
+            setY(WINDOW_W - stats.get(RADIUS));
+        }
+    }
+
+    public boolean isColliding(Entity target) {
+        if (target instanceof Food food) {
+            return getEntityDistance(food) < stats.get(RADIUS);
+        } else if (target instanceof Creature creature) {
+            return getEntityDistance(creature) < stats.get(RADIUS) + creature.getR();
+        }
+        return false;
+    }
+
+    public Collection<Entity> testEntityCollisions() {
+        Collection<Entity> collisions = new HashSet<>();
+        for (Entity target: foods.getFoodContainer()) {
+            if (isColliding(target)) {
                 collisions.add(target);
             }
         }
-        for (Creature target: creatures.getCreatureContainer()) {
-            if (Math.sqrt(Math.pow(target.getR() + Math.abs(target.getX() - getX()),2) + Math.pow(target.getR() + Math.abs(target.getY() - getY()),2)) < r + target.getR() && target != this) {
+        for (Entity target: creatures.getCreatures()) {
+            if (isColliding(target) && target != this) {
                 collisions.add(target);
             }
         }
-        System.out.println(collisions);
         return collisions;
     }
 
     public void handleEntityCollisions() {
-        ArrayList<Entity> collisions = testEntityCollisions();
+        Collection<Entity> collisions = testEntityCollisions();
         for (Entity target : collisions) {
             if (target instanceof Food food) {
                 foods.remove(food);
-                if (energy < maxEnergy) { energy += food.getEnergy(); }
+                if (energy < stats.get(MAX_ENERGY)) { energy += food.getEnergy(); }
             } else if (target instanceof Creature creature) {
                 attack(creature);
+                double dx = creature.getX() - getX();
+                double dy = creature.getY() - getY();
+                double dis = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+                double overlap = Math.abs(creature.getR() + getR() - dis);
+                double[] correction = new double[]{dx, dy};
+                normalize(correction);
+                setX(getX() - correction[0] / 2 * overlap);
+                setY(getY() - correction[1] / 2 * overlap);
             }
         }
     }
@@ -120,11 +129,11 @@ public class Creature extends Entity{
     public Entity seekEntity(EntityType type) {
         double minDis = Double.MAX_VALUE;
         Entity close = null;
-        var list = type == CREATURE ? creatures.getCreatureContainer() : foods.getFoodContainer();
+        var set = type == CREATURE ? creatures.getMateSearchingCreatures() : foods.getFoodContainer();
 
-        for (var entity: list) {
-            double dis = Math.pow((entity.getX() - getX()),2) + Math.pow((entity.getY() - getY()),2);
-            if (dis < minDis) {
+        for (var entity: set) {
+            double dis = getEntityDistance(entity);
+            if (dis < minDis && entity != this) {
                 minDis = dis;
                 close = entity;
             }
@@ -132,49 +141,101 @@ public class Creature extends Entity{
         return close;
     }
 
-    public void breed(Creature c) {
+    public void breed(Creature creature) {
+        state = MATING;
+        creature.setState(MATING);
+        mateTime = System.currentTimeMillis();
+        creature.setMateTime(mateTime);
 
+        Map<Stat, Double> stats = new HashMap<>();
+        stats.put(RADIUS, chooseStat(this, creature, RADIUS));
+        stats.put(SPEED, chooseStat(this, creature, SPEED));
+        stats.put(STEER_FORCE, chooseStat(this, creature, STEER_FORCE));
+        stats.put(STRENGTH, chooseStat(this, creature, STRENGTH));
+        stats.put(MAX_ENERGY, chooseStat(this, creature, MAX_ENERGY));
+        stats.put(MAX_HEALTH, chooseStat(this, creature, MAX_HEALTH));
+
+        energy -= CREATURE_BREED_ENERGY_DEPRECIATION;
+        creatures.add(new Creature(getX() - 30, getY() - 30, stats, foods, creatures));
+    }
+
+    public static double chooseStat(Creature creature1, Creature creature2, Stat stat) {
+        double parentChoice = ThreadLocalRandom.current().nextDouble(-1, 1);
+        double statValue = parentChoice < 0 ? creature2.getStat(stat) : creature1.getStat(stat);
+        double mutateChoice = ThreadLocalRandom.current().nextDouble(1);
+        if (mutateChoice >= 1 - CREATURE_MUTATION_CHANCE / 2) {
+            return statValue + (statValue * CREATURE_MUTATION_EFFECT / 100);
+        } else if (mutateChoice <= CREATURE_MUTATION_CHANCE / 2) {
+            return statValue - (statValue * CREATURE_MUTATION_EFFECT / 100);
+        } else {
+            return statValue;
+        }
     }
 
     public void attack(Creature creature) {
-        creature.setHealth(creature.getHealth() - strength * DELTA_TIME);
+        creature.setHealth(creature.getHealth() - stats.get(STRENGTH) * DELTA_TIME);
     }
 
     public void update() {
-
-        if (energy <= 0) {
-            health -= .5 * DELTA_TIME;
-        }
-        if (state != MATING) { move(); }
         handleEntityCollisions();
+        if (state != MATING) {
+            if (energy > breedThreshold) {
+                state = SEARCHING_FOR_MATE;
+            } else if (energy > 0) {
+                state = SEARCHING_FOR_FOOD;
+            } else {
+                health -= CREATURE_HUNGRY_HEALTH_DEPRECIATION * DELTA_TIME;
+            }
+            move();
+        } else if (System.currentTimeMillis() - mateTime > CREATURE_BREED_DELAY_MILLIS) {
+            state = SEARCHING_FOR_FOOD;
+            vel[0] *= -1;
+            vel[1] *= -1;
+        }
     }
 
-    public double getX() {
-        return x;
+    public CreatureState getState() {
+        return state;
     }
 
-    public void setX(double x) {
-        this.x = x;
+    public void setState(CreatureState state) {
+        this.state = state;
     }
 
-    public double getY() {
-        return y;
+    public void setMateTime(double mateTime) {
+        this.mateTime = mateTime;
     }
 
-    public void setY(double y) {
-        this.y = y;
+    public double getStat(Stat stat) {
+        return stats.get(stat);
+    }
+
+    public double getHealth() {
+        return health;
+    }
+
+    public void setHealth(Double h) {
+        health = h;
+    }
+
+    public double getEnergy() {
+        return energy;
+    }
+
+    public double getR() {
+        return stats.get(RADIUS);
     }
 
     public void paint(Graphics g) {
         g.setColor(new Color(172, 248, 159));
-        g.fillOval((int)(x - r), (int)(y - r), 2 * r, 2 * r);
+        g.fillOval((int)(getX() - stats.get(RADIUS)), (int)(getY() - stats.get(RADIUS)), (int)(2 * stats.get(RADIUS)), (int)(2 * stats.get(RADIUS)));
 
         g.setColor(new Color(220, 0, 0));
-        g.drawLine((int)x, (int)y, (int)(x + lineLen * vel[0]), (int)(y + lineLen * vel[1]));
+        g.drawLine((int)getX(), (int)getY(), (int)(getX() + CREATURE_LINE_LENGTH * vel[0]), (int)(getY() + CREATURE_LINE_LENGTH * vel[1]));
     }
 
     @Override
     public String toString() {
-        return "creature" + x + " " + y;
+        return "creature " + super.toString();
     }
 }

@@ -1,20 +1,54 @@
 package me.ukaday.evolution;
 
 import java.awt.*;
+import java.util.Collection;
+import java.util.HashSet;
+
+import static me.ukaday.evolution.Stat.RADIUS;
 
 public abstract class Entity {
 
     private double x, y;
 
-    public abstract double getX();
+    public Entity(double x, double y)
+    {
+        this.x = x;
+        this.y = y;
+    }
 
-    public abstract void setX(double x);
+    public double getX()
+    {
+        return x;
+    }
 
-    public abstract double getY();
+    public void setX(double x)
+    {
+        this.x = x;
+    }
 
-    public abstract void setY(double y);
+    public double getY()
+    {
+        return y;
+    }
+
+    public void setY(double y)
+    {
+        this.y = y;
+    }
+
+    public double getEntityDistance(Entity target) {
+        double x2 = Math.pow(target.getX() - getX(), 2);
+        double y2 = Math.pow(target.getY() - getY(), 2);
+        return Math.sqrt(x2 + y2);
+    }
+
+    public abstract boolean isColliding(Entity target);
 
     public abstract void paint(Graphics g);
 
-    public abstract String toString();
+    @Override
+    public String toString()
+    {
+        return x + " " + y;
+    }
 }
