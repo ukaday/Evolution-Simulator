@@ -20,8 +20,8 @@ public class Food extends Entity{
         return energy;
     }
 
-    public void paint(Graphics g) {
+    public void paint(Graphics g, double xOffSet, double yOffSet, double zoom) {
         g.setColor(new Color(130, 80, 130));
-        g.fillRect((int)(getX() - s/2), (int)(getY() - s/2), (int)s, (int)s);
+        g.fillRect((int)((getX() - s/2 - xOffSet) * zoom), (int)((getY() - s/2 - yOffSet) * zoom), (int)(s * zoom), (int)(s * zoom));
     }
 }

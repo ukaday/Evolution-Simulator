@@ -3,29 +3,36 @@ package me.ukaday.evolution;
 import javax.swing.*;
 import java.awt.*;
 
-public class Evolution extends JFrame{
+//make highlight when hovering over creatures
+//make mouse position update after it is put into map
+// fix UI make both windows more visible
+//make open and close function to window
+//make a smooth camera movement from old focused creature to new focused creature
+
+//breeding system should include stat balances (i.e. size increase, speed should decrease)
+
+public class Evolution extends JFrame {
     public static final int WINDOW_W = 800;
     public static final int WINDOW_H = 600;
 
-    public Evolution()
-    {
-        super("me.ukaday.evolution.Evolution Simulator");
+    public Evolution() {
+        super("Evolution Simulator");
+        new Level();
 
-        Level panel = new Level();
-        panel.setPreferredSize(new Dimension(WINDOW_W , WINDOW_H));
-        getContentPane().add(panel);
-        this.pack();
-
+        setLayout(new BorderLayout());
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setFocusable(true);
         setVisible(true);
 
-        panel.run();
+        ViewInitializer viewInitializer = new ViewInitializer(this);
+
+        pack();
+        viewInitializer.run();
     }
 
+
     public static void main( String args[] ) {
-        Evolution run = new Evolution();
+        new Evolution();
     }
 }
 
-//

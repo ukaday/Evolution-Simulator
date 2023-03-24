@@ -1,7 +1,9 @@
 package me.ukaday.evolution;
 
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.*;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static me.ukaday.evolution.Evolution.WINDOW_H;
 import static me.ukaday.evolution.Evolution.WINDOW_W;
@@ -12,7 +14,7 @@ public class Foods {
 
     private long prevFoodTime = 0;
     public static final long FOOD_SPAWN_DELAY = 200;
-    private final ArrayList<Food> foodContainer = new ArrayList<>();
+    private final Collection<Food> foodContainer = new CopyOnWriteArrayList<>();
 
     public Foods() {
     }
@@ -25,7 +27,7 @@ public class Foods {
         foodContainer.remove(food);
     }
 
-    public ArrayList<Food> getFoodContainer() {
+    public Collection<Food> getFoodContainer() {
         return foodContainer;
     }
 
@@ -39,11 +41,13 @@ public class Foods {
         int energy = r.nextInt(1, 3);
         add(new Food(x, y, energy));
         prevFoodTime = time;
+
+
     }
 
-    public void paint(Graphics g) {
+    public void paint(Graphics g, double xOffSet, double yOffSet, double zoom) {
         for (Food food : foodContainer) {
-            food.paint(g);
+            food.paint(g, xOffSet, yOffSet, zoom);
         }
     }
 }

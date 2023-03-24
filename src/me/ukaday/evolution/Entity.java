@@ -44,7 +44,7 @@ public abstract class Entity {
 
     public abstract boolean isColliding(Entity target);
 
-    public abstract void paint(Graphics g);
+    public abstract void paint(Graphics g, double xOffSet, double yOffSet, double zoom);
 
     @Override
     public String toString()

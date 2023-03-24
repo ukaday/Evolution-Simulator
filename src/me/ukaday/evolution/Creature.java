@@ -1,7 +1,6 @@
 package me.ukaday.evolution;
 
 import java.awt.*;
-import java.awt.List;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -25,6 +24,7 @@ public class Creature extends Entity{
     private CreatureState state = SEARCHING_FOR_FOOD;
     private final Foods foods;
     private final Creatures creatures;
+    //private final Color color;
 
     public Creature(double x, double y, Map<Stat, Double> stats, Foods foods, Creatures creatures) {
         super(x, y);
@@ -34,6 +34,10 @@ public class Creature extends Entity{
         this.breedThreshold = 2 * stats.get(MAX_ENERGY) / 2;
         this.foods = foods;
         this.creatures = creatures;
+
+        int r = (int)Math.min(stats.get(MAX_HEALTH) / stats.get(MAX_ENERGY), 1);
+        int g = (int)Math.min(stats.get(MAX_HEALTH) / stats.get(MAX_ENERGY), 1);
+        int b = (int)Math.min(stats.get(MAX_HEALTH) / stats.get(MAX_ENERGY), 1);
     }
 
     public void move() {
@@ -46,7 +50,6 @@ public class Creature extends Entity{
             acel[0] = dx - vel[0] * stats.get(SPEED);
             acel[1] = dy - vel[1] * stats.get(SPEED);
             normalize(acel);
-
         } else {
             acel[0] = acel[1] = 0;
         }
@@ -62,9 +65,9 @@ public class Creature extends Entity{
 
         handleBorderCollision();
 
-       if (target != null && state == SEARCHING_FOR_MATE && getEntityDistance(target) - getR() - ((Creature)target).getR() < CREATURE_MATING_DISTANCE) {
-           breed((Creature)target);
-       }
+        if (target != null && state == SEARCHING_FOR_MATE && getEntityDistance(target) - getR() - ((Creature)target).getR() < CREATURE_MATING_DISTANCE) {
+            breed((Creature)target);
+        }
 
         energy -= CREATURE_MOVING_ENERGY_DEPRECIATION * DELTA_TIME;
     }
@@ -77,8 +80,8 @@ public class Creature extends Entity{
         }
         if (getY() < stats.get(RADIUS)) {
             setY(stats.get(RADIUS));
-        } else if (getY() > WINDOW_W - stats.get(RADIUS)) {
-            setY(WINDOW_W - stats.get(RADIUS));
+        } else if (getY() > WINDOW_H - stats.get(RADIUS)) {
+            setY(WINDOW_H - stats.get(RADIUS));
         }
     }
 
@@ -129,9 +132,9 @@ public class Creature extends Entity{
     public Entity seekEntity(EntityType type) {
         double minDis = Double.MAX_VALUE;
         Entity close = null;
-        var set = type == CREATURE ? creatures.getMateSearchingCreatures() : foods.getFoodContainer();
+        var entities = type == CREATURE ? creatures.getMateSearchingCreatures() : foods.getFoodContainer();
 
-        for (var entity: set) {
+        for (var entity: entities) {
             double dis = getEntityDistance(entity);
             if (dis < minDis && entity != this) {
                 minDis = dis;
@@ -156,16 +159,16 @@ public class Creature extends Entity{
         stats.put(MAX_HEALTH, chooseStat(this, creature, MAX_HEALTH));
 
         energy -= CREATURE_BREED_ENERGY_DEPRECIATION;
-        creatures.add(new Creature(getX() - 30, getY() - 30, stats, foods, creatures));
+        creatures.add(new Creature(getX() - 15, getY() - 15, stats, foods, creatures));
     }
 
     public static double chooseStat(Creature creature1, Creature creature2, Stat stat) {
         double parentChoice = ThreadLocalRandom.current().nextDouble(-1, 1);
         double statValue = parentChoice < 0 ? creature2.getStat(stat) : creature1.getStat(stat);
         double mutateChoice = ThreadLocalRandom.current().nextDouble(1);
-        if (mutateChoice >= 1 - CREATURE_MUTATION_CHANCE / 2) {
+        if (mutateChoice >= 1 - CREATURE_MUTATION_CHANCE / 100 / 2) {
             return statValue + (statValue * CREATURE_MUTATION_EFFECT / 100);
-        } else if (mutateChoice <= CREATURE_MUTATION_CHANCE / 2) {
+        } else if (mutateChoice <= CREATURE_MUTATION_CHANCE / 100 / 2) {
             return statValue - (statValue * CREATURE_MUTATION_EFFECT / 100);
         } else {
             return statValue;
@@ -226,12 +229,14 @@ public class Creature extends Entity{
         return stats.get(RADIUS);
     }
 
-    public void paint(Graphics g) {
+    public void paint(Graphics g, double xOffSet, double yOffSet, double zoom) {
+        double x = (getX() - xOffSet) * zoom;
+        double y = (getY() - yOffSet) * zoom;
         g.setColor(new Color(172, 248, 159));
-        g.fillOval((int)(getX() - stats.get(RADIUS)), (int)(getY() - stats.get(RADIUS)), (int)(2 * stats.get(RADIUS)), (int)(2 * stats.get(RADIUS)));
+        g.fillOval((int)(x - stats.get(RADIUS) * zoom), (int)(y - stats.get(RADIUS) * zoom), (int)(2 * stats.get(RADIUS) * zoom), (int)(2 * stats.get(RADIUS) * zoom));
 
         g.setColor(new Color(220, 0, 0));
-        g.drawLine((int)getX(), (int)getY(), (int)(getX() + CREATURE_LINE_LENGTH * vel[0]), (int)(getY() + CREATURE_LINE_LENGTH * vel[1]));
+        g.drawLine((int)x, (int)y, (int)(x + CREATURE_LINE_LENGTH * vel[0] * zoom), (int)(y + CREATURE_LINE_LENGTH * vel[1] * zoom));
     }
 
     @Override
