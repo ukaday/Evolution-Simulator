@@ -4,14 +4,15 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static me.ukaday.evolution.CreatureState.*;
 import static me.ukaday.evolution.FocusedView.*;
 
 public class Creatures {
 
-    private final Collection<Creature> creatures = new ArrayList<>();
-    private final Collection<Creature> mateSearchingCreatures = new ArrayList<>();
+    private final Collection<Creature> creatures = new CopyOnWriteArrayList<>();
+    private final Collection<Creature> mateSearchingCreatures = new CopyOnWriteArrayList<>();
 
     public Creatures() {
     }
@@ -51,7 +52,7 @@ public class Creatures {
     }
 
     public void update() {
-        for (Creature creature : Set.copyOf(creatures)) {
+        for (Creature creature : creatures) {
             creature.update();
             checkDead(creature);
             checkMateSearching(creature);
@@ -66,7 +67,7 @@ public class Creatures {
     }
 
     public void paint(Graphics g, double xOffSet, double yOffSet, double zoom) {
-        for (Creature c : Set.copyOf(creatures)) {
+        for (Creature c : creatures) {
             c.paint(g, xOffSet, yOffSet, zoom);
         }
     }

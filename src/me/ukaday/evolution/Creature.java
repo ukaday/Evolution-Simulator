@@ -24,7 +24,7 @@ public class Creature extends Entity{
     private CreatureState state = SEARCHING_FOR_FOOD;
     private final Foods foods;
     private final Creatures creatures;
-    //private final Color color;
+    private Color color;
 
     public Creature(double x, double y, Map<Stat, Double> stats, Foods foods, Creatures creatures) {
         super(x, y);
@@ -34,6 +34,7 @@ public class Creature extends Entity{
         this.breedThreshold = 2 * stats.get(MAX_ENERGY) / 2;
         this.foods = foods;
         this.creatures = creatures;
+        createCreatureColor();
 
         int r = (int)Math.min(stats.get(MAX_HEALTH) / stats.get(MAX_ENERGY), 1);
         int g = (int)Math.min(stats.get(MAX_HEALTH) / stats.get(MAX_ENERGY), 1);
@@ -70,6 +71,10 @@ public class Creature extends Entity{
         }
 
         energy -= CREATURE_MOVING_ENERGY_DEPRECIATION * DELTA_TIME;
+    }
+
+    public void attack(Creature creature) {
+        creature.setHealth(creature.getHealth() - stats.get(STRENGTH) * DELTA_TIME);
     }
 
     private void handleBorderCollision() {
@@ -175,8 +180,26 @@ public class Creature extends Entity{
         }
     }
 
-    public void attack(Creature creature) {
-        creature.setHealth(creature.getHealth() - stats.get(STRENGTH) * DELTA_TIME);
+    public double getPercentageMutated(Stat stat) {
+        return stats.get(stat) / STARTING_STAT_MAP.get(stat) * 100;
+    }
+
+    public BetterColor getColorContribution(Stat stat) {
+        BetterColor contribution = STAT_COLOR_MAP.get(stat).copy();
+        contribution.multiply(getPercentageMutated(stat) / 100);
+        contribution.divide(stats.size());
+        return contribution;
+    }
+
+    public void createCreatureColor() {
+        BetterColor color = new BetterColor(0, 0, 0);
+        for (var statEntry : stats.entrySet()) {
+            BetterColor contribution = getColorContribution(statEntry.getKey());
+            color.add(contribution);
+        }
+        color.brighten();
+        System.out.println(color);
+        this.color = color.getColorObject();
     }
 
     public void update() {
@@ -232,7 +255,7 @@ public class Creature extends Entity{
     public void paint(Graphics g, double xOffSet, double yOffSet, double zoom) {
         double x = (getX() - xOffSet) * zoom;
         double y = (getY() - yOffSet) * zoom;
-        g.setColor(new Color(172, 248, 159));
+        g.setColor(color);
         g.fillOval((int)(x - stats.get(RADIUS) * zoom), (int)(y - stats.get(RADIUS) * zoom), (int)(2 * stats.get(RADIUS) * zoom), (int)(2 * stats.get(RADIUS) * zoom));
 
         g.setColor(new Color(220, 0, 0));

@@ -27,13 +27,13 @@ public class Level implements Runnable {
         stats.put(MAX_ENERGY, STARTING_CREATURE_MAX_ENERGY);
         stats.put(MAX_HEALTH, STARTING_CREATURE_MAX_HEALTH);
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 30; i++) {
             int x = r.nextInt(SPAWN_BEZEL, WINDOW_W - SPAWN_BEZEL);
             int y = r.nextInt(SPAWN_BEZEL, WINDOW_H - SPAWN_BEZEL);
             CREATURES.add(new Creature(x, y, stats, FOODS, CREATURES));
         }
 
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 90; i++) {
             int x = r.nextInt(SPAWN_BEZEL,WINDOW_W - SPAWN_BEZEL);
             int y = r.nextInt(SPAWN_BEZEL,WINDOW_H - SPAWN_BEZEL);
             int energy = r.nextInt(1, 3);
