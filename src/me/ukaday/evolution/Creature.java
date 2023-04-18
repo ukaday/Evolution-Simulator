@@ -6,8 +6,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import static me.ukaday.evolution.CreatureState.*;
 import static me.ukaday.evolution.EntityType.*;
-import static me.ukaday.evolution.Evolution.WINDOW_H;
-import static me.ukaday.evolution.Evolution.WINDOW_W;
 import static me.ukaday.evolution.Level.*;
 import static me.ukaday.evolution.Settings.*;
 import static me.ukaday.evolution.Stat.*;
@@ -35,10 +33,6 @@ public class Creature extends Entity{
         this.foods = foods;
         this.creatures = creatures;
         createCreatureColor();
-
-        int r = (int)Math.min(stats.get(MAX_HEALTH) / stats.get(MAX_ENERGY), 1);
-        int g = (int)Math.min(stats.get(MAX_HEALTH) / stats.get(MAX_ENERGY), 1);
-        int b = (int)Math.min(stats.get(MAX_HEALTH) / stats.get(MAX_ENERGY), 1);
     }
 
     public void move() {
@@ -155,6 +149,17 @@ public class Creature extends Entity{
         mateTime = System.currentTimeMillis();
         creature.setMateTime(mateTime);
 
+        Map<Stat, Double> stats = createChildStatMap(creature);
+        if (ThreadLocalRandom.current().nextDouble(0, 1) < CREATURE_MUTATION_CHANCE / 100) {
+            CreatureMutation mutation = new CreatureMutation(stats);
+            stats = mutation.getStatMap();
+        }
+
+        energy -= CREATURE_BREED_ENERGY_DEPRECIATION;
+        creatures.add(new Creature(getX() - 15, getY() - 15, stats, foods, creatures));
+    }
+
+    public Map<Stat, Double> createChildStatMap(Creature creature) {
         Map<Stat, Double> stats = new HashMap<>();
         stats.put(RADIUS, chooseStat(this, creature, RADIUS));
         stats.put(SPEED, chooseStat(this, creature, SPEED));
@@ -162,22 +167,13 @@ public class Creature extends Entity{
         stats.put(STRENGTH, chooseStat(this, creature, STRENGTH));
         stats.put(MAX_ENERGY, chooseStat(this, creature, MAX_ENERGY));
         stats.put(MAX_HEALTH, chooseStat(this, creature, MAX_HEALTH));
-
-        energy -= CREATURE_BREED_ENERGY_DEPRECIATION;
-        creatures.add(new Creature(getX() - 15, getY() - 15, stats, foods, creatures));
+        return stats;
     }
 
+
     public static double chooseStat(Creature creature1, Creature creature2, Stat stat) {
-        double parentChoice = ThreadLocalRandom.current().nextDouble(-1, 1);
-        double statValue = parentChoice < 0 ? creature2.getStat(stat) : creature1.getStat(stat);
-        double mutateChoice = ThreadLocalRandom.current().nextDouble(1);
-        if (mutateChoice >= 1 - CREATURE_MUTATION_CHANCE / 100 / 2) {
-            return statValue + (statValue * CREATURE_MUTATION_EFFECT / 100);
-        } else if (mutateChoice <= CREATURE_MUTATION_CHANCE / 100 / 2) {
-            return statValue - (statValue * CREATURE_MUTATION_EFFECT / 100);
-        } else {
-            return statValue;
-        }
+        double parentChoice = ThreadLocalRandom.current().nextDouble(0, 1);
+        return parentChoice < .5 ? creature2.getStat(stat) : creature1.getStat(stat);
     }
 
     public double getPercentageMutated(Stat stat) {
@@ -198,7 +194,6 @@ public class Creature extends Entity{
             color.add(contribution);
         }
         color.brighten();
-        System.out.println(color);
         this.color = color.getColorObject();
     }
 
@@ -244,8 +239,8 @@ public class Creature extends Entity{
         health = h;
     }
 
-    public double getEnergy() {
-        return energy;
+    public double getSpeed() {
+        return stats.get(SPEED);
     }
 
     public double getR() {

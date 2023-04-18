@@ -3,9 +3,9 @@ package me.ukaday.evolution;
 import java.awt.*;
 
 import static me.ukaday.evolution.Direction.*;
-import static me.ukaday.evolution.Evolution.WINDOW_H;
-import static me.ukaday.evolution.Evolution.WINDOW_W;
 import static me.ukaday.evolution.Level.DELTA_TIME;
+import static me.ukaday.evolution.Settings.WINDOW_H;
+import static me.ukaday.evolution.Settings.WINDOW_W;
 
 public class Ball {
 

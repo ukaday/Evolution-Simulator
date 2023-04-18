@@ -6,5 +6,5 @@ public enum Stat {
    STEER_FORCE,
    STRENGTH,
    MAX_ENERGY,
-   MAX_HEALTH
+   MAX_HEALTH,
 }

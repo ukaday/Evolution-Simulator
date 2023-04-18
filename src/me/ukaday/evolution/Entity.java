@@ -8,7 +8,7 @@ import static me.ukaday.evolution.Stat.RADIUS;
 
 public abstract class Entity {
 
-    private double x, y;
+    protected volatile double x, y;
 
     public Entity(double x, double y)
     {
@@ -42,7 +42,12 @@ public abstract class Entity {
         return Math.sqrt(x2 + y2);
     }
 
-    public abstract boolean isColliding(Entity target);
+    public boolean isColliding(Entity target) {
+        return false;
+    }
+
+    public void update() {
+    }
 
     public abstract void paint(Graphics g, double xOffSet, double yOffSet, double zoom);
 

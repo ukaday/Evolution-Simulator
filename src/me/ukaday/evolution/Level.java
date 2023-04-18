@@ -4,11 +4,8 @@ import java.util.HashMap;
 import java.util.Random;
 
 import static me.ukaday.evolution.Evolution.*;
-import static me.ukaday.evolution.InputListener.MOUSE_STATES;
-import static me.ukaday.evolution.MainView.*;
 import static me.ukaday.evolution.Settings.*;
 import static me.ukaday.evolution.Stat.*;
-import static me.ukaday.evolution.FocusedView.*;
 
 public class Level implements Runnable {
 

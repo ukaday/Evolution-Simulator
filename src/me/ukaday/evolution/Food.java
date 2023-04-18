@@ -12,10 +12,6 @@ public class Food extends Entity{
         this.energy = energy;
     }
 
-    public boolean isColliding(Entity target) {
-        return false;
-    }
-
     public double getEnergy() {
         return energy;
     }

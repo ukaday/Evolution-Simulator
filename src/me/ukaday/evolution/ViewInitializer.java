@@ -4,7 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.*;
 
-import static me.ukaday.evolution.Evolution.*;
+import static me.ukaday.evolution.Settings.*;
+
 
 public class ViewInitializer{
 
@@ -17,7 +18,7 @@ public class ViewInitializer{
         FocusedView focusedView = new FocusedView(inputListener);
 
         mainView.setPreferredSize(new Dimension(WINDOW_W, WINDOW_H));
-        focusedView.setPreferredSize(new Dimension (500, 600));
+        focusedView.setPreferredSize(new Dimension (FOCUS_WINDOW_W, FOCUS_WINDOW_H));
         views.add(mainView);
         views.add(focusedView);
         frame.add(focusedView, BorderLayout.EAST);

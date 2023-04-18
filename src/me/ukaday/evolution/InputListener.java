@@ -23,7 +23,6 @@ public class InputListener implements KeyListener, MouseListener {
 
     public void keyPressed(KeyEvent e) {
         KEY_STATES.put(e.getKeyCode(), true);
-        System.out.println(e.getKeyCode());
     }
 
     public void keyReleased(KeyEvent e) {
@@ -36,7 +35,6 @@ public class InputListener implements KeyListener, MouseListener {
 
     public void mousePressed(MouseEvent e) {
         MOUSE_STATES.put(e.getButton(), frame.getMousePosition());
-        System.out.println(MOUSE_STATES);
     }
 
     public void mouseReleased(MouseEvent e) {

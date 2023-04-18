@@ -4,16 +4,12 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import static me.ukaday.evolution.Evolution.WINDOW_H;
-import static me.ukaday.evolution.Evolution.WINDOW_W;
 import static me.ukaday.evolution.Level.r;
-import static me.ukaday.evolution.Settings.SPAWN_BEZEL;
+import static me.ukaday.evolution.Settings.*;
 
 public class Foods {
 
     private long prevFoodTime = 0;
-    public static final long FOOD_SPAWN_DELAY = 200;
     private final Collection<Food> foodContainer = new CopyOnWriteArrayList<>();
 
     public Foods() {
