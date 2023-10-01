@@ -1,6 +1,8 @@
 package me.ukaday.evolution;
 
 import java.awt.*;
+import java.util.List;
+import java.util.ArrayList;
 
 import static me.ukaday.evolution.Level.*;
 import static me.ukaday.evolution.Settings.*;
@@ -10,8 +12,6 @@ public class Camera extends Entity {
 
     private Entity focus;
     private boolean transitioning = false;
-    public volatile double xOffset;
-    public volatile double yOffset;
     private final double[] v = new double[]{0, 0};
     private final double[] d = new double[]{0, 0};
 

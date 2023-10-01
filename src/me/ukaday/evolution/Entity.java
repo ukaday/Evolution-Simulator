@@ -1,10 +1,6 @@
 package me.ukaday.evolution;
 
 import java.awt.*;
-import java.util.Collection;
-import java.util.HashSet;
-
-import static me.ukaday.evolution.Stat.RADIUS;
 
 public abstract class Entity {
 

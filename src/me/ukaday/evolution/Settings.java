@@ -65,5 +65,5 @@ public class Settings {
     }};
 
     public static final double FOCUSED_VIEW_ZOOM_FACTOR = 1.7;
-    public static final double CREATURE_CAMERA_SPEED_FACTOR = .02;
+    public static final double CREATURE_CAMERA_SPEED_FACTOR = .015;
 }

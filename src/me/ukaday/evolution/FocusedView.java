@@ -22,7 +22,7 @@ public class FocusedView extends View{
     }
 
     public double getYOffset() {
-        yOffset = camera.getY() - this.getWidth() / 2.0 / FOCUSED_VIEW_ZOOM_FACTOR;
+        yOffset = camera.getY() - this.getHeight() / 2.0 / FOCUSED_VIEW_ZOOM_FACTOR;
         return yOffset;
     }
 
